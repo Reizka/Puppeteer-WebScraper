@@ -63,22 +63,7 @@ const password = process.env.PASSWORD;
 
   console.log(`CSV file has been saved to ${csvFilePath}`);
 
-  //await browser.close();
+  await browser.close();
 
 
 })();
-
-/*
-
-<div id="comp-jub924u9" 
-class="BaOVQ8 tz5f0K comp-jub924u9 wixui-rich-text" 
-data-testid="richTextElement">
-
-<h6 class="font_6 wixui-rich-text__text" style="font-size:13px;">
-<span style="font-size:13px;" class="wixui-rich-text__text"><span style="color:#3C8BA0;" class="wixui-rich-text__text">
-<span style="font-weight:normal;" class="wixui-rich-text__text">Leuven</span>
-</span></span></h6>
-</div>
-
-
-*/
