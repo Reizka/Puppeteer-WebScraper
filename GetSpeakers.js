@@ -1,16 +1,19 @@
 const GetSpeakers = async (page) => {
+    // open the speaker db page
   await page.goto("https://www.pintofscience.be/speakers");
+   // delay for manual scrolling
   await new Promise(resolve => setTimeout(resolve, 10000));
+  // Auto scroll the speaker table - doesn't work atm.
   //await autoScrollPage(page);
   //await autoScroll(page, ".mtQJtX");
-  //put console feed to terminal
-  // Select all table rows
+
+  // Get table rows
   return await page.$$eval("tr", (tableRows) => {
     return tableRows.map((row) => {
       const cells = Array.from(row.querySelectorAll("td")).map((td) => {
         const div = td.querySelector(".ZTH0AF");
         let text = div ? div.innerText : td.innerText;
-        // Remove semicolons (and optionally commas) without adding spaces
+        // replace semicolon with commas
         text = text.replace(/;/g, ",");
         return text; // You need to return the text here
       });
@@ -19,13 +22,16 @@ const GetSpeakers = async (page) => {
 
       // Get the URL of a link in the row
       const link = row.querySelector("a");
+      // add link url to to the selected cells
       const url = link ? link.href : null;
       return { cells: selectedCells, url };
     });
   });
 };
 
+// open each link in the table and get the city
 const OpenAndCloseLinks = async (browser, rows) => {
+    //30 speakers in a single go
   for (let i = 0; i < rows.length; i += 30) {
     const chunk = rows.slice(i, i + 30);
     await Promise.all(
@@ -35,6 +41,7 @@ const OpenAndCloseLinks = async (browser, rows) => {
           const newPage = await browser.newPage();
           await newPage.goto(row.url);
           const city = await newPage.evaluate(() => {
+            // ID for the div that holds the preferred city for speaker
             const element = document.querySelector("#comp-jub924u9");
             return element ? element.innerText : "not set";
           });
