@@ -2,6 +2,7 @@ const puppeteer = require("puppeteer");
 const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
+const {GetSpeakers, OpenAndCloseLinks} = require("./GetSpeakers");
 const username = process.env.USERNAME_P;
 const password = process.env.PASSWORD;
 
@@ -37,38 +38,22 @@ const password = process.env.PASSWORD;
   //Wait for the page to load
   await page.waitForSelector("#comp-jsiwcnoq");
 
-  await page.goto("https://www.pintofscience.be/speakers");
-
-  // Select all table rows
-  const rows = await page.$$eval("tr", (rows) => {
-    return rows.map((row) => {
-      const cells = Array.from(row.querySelectorAll("td")).map((td) => {
-        const div = td.querySelector(".ZTH0AF");
-        let text = div ? div.innerText : td.innerText;
-        // Remove semicolons (and optionally commas) without adding spaces
-        text = text.replace(/;/g, ",");
-        return text;
-      });
-      // Select specific td contents: 2nd to 5th and 7th
-      const selectedCells = [cells[1], cells[2], cells[3], cells[4], cells[6]];
-      return selectedCells;
-    });
-  });
-
-    // Get the first row's link
-  const link = row.querySelector('a');
-  await link.click();
-  const prefCity = await page.evaluate('1 + 2');
-  rows.push(prefCity);
+  //delayt to scroll by hand
 
 
+  // Go throug the speaker table
+  const rows = await GetSpeakers(page)
+  await OpenAndCloseLinks(browser,rows);
+
+  console.log("creating CSV file...");
   // Prepare CSV content
-  let csvContent = "name;area of expertise;topic;keywords;date;preferred city\n"; // CSV header
+  let csvContent =
+    "name;area of expertise;topic;keywords;date;preferred city\n"; // CSV header
   rows.forEach((row) => {
-    csvContent += row.join(";") + "\n"; // Join each row's columns and add a new line
+    if (row[0] != "") {
+      csvContent += row.cells.join(";") + "\n"; // Join each row's columns and add a new line
+    }
   });
-
-
 
   // Define CSV file path (adjust the filename as needed)
   const csvFilePath = path.resolve(__dirname, "tableData.csv");
@@ -78,7 +63,22 @@ const password = process.env.PASSWORD;
 
   console.log(`CSV file has been saved to ${csvFilePath}`);
 
-  await browser.close();
-
   //await browser.close();
+
+
 })();
+
+/*
+
+<div id="comp-jub924u9" 
+class="BaOVQ8 tz5f0K comp-jub924u9 wixui-rich-text" 
+data-testid="richTextElement">
+
+<h6 class="font_6 wixui-rich-text__text" style="font-size:13px;">
+<span style="font-size:13px;" class="wixui-rich-text__text"><span style="color:#3C8BA0;" class="wixui-rich-text__text">
+<span style="font-weight:normal;" class="wixui-rich-text__text">Leuven</span>
+</span></span></h6>
+</div>
+
+
+*/
